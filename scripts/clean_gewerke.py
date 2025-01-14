@@ -1,5 +1,27 @@
 import argparse
 import os
+import re
+
+def is_valid_gewerk(gewerk):
+    """
+    Prüft, ob ein Gewerk-Eintrag gültig ist.
+    :param gewerk: Der zu prüfende Gewerk-Eintrag.
+    :return: True, wenn der Eintrag gültig ist, False ansonsten.
+    """
+    # Entferne Einträge, die nur aus Ziffern bestehen
+    if re.match(r"^\d+$", gewerk):
+        return False
+
+    # Entferne Einträge, die hauptsächlich aus Ziffern und wenigen Sonderzeichen bestehen
+    if re.match(r"^[^a-zA-Z]*\d+[^a-zA-Z]*$", gewerk):
+        return False
+
+    # Entferne sehr kurze Einträge (z. B. Ein-Buchstaben-Einträge)
+    if len(gewerk) < 3:
+        return False
+
+    # Einträge mit sinnvollen Sonderzeichen (z. B. ".winterdienst") behalten
+    return True
 
 def clean_gewerke(input_file, output_file):
     """
@@ -17,7 +39,7 @@ def clean_gewerke(input_file, output_file):
         cleaned = set()  # Set für Duplikateliminierung
         for line in lines:
             gewerk = line.strip().lower()  # Groß-/Kleinschreibung normalisieren
-            if gewerk and gewerk not in ["-", "n/a"]:  # Müll und leere Zeilen entfernen
+            if gewerk and is_valid_gewerk(gewerk):  # Filter anwenden
                 cleaned.add(gewerk)
 
         # Sortierte Liste speichern
